@@ -1,0 +1,328 @@
+#include <ctype.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+unsigned long long factorial(unsigned int x);
+void logger(int id, char msg[]);
+void toLowerCase(char *str);
+int includes(char *str, int length, char elem);
+void change(char *a, int ind, char vowels[]);
+void pushVowels(char *str);
+int word_include(char src[][512], int src_len, char *word);
+void morse_converter(char *src, char **dest);
+
+int main(int argc, char *argv[]) {
+    // char c = getchar();
+    char d;
+    // while ((d = getchar()) != EOF) {
+    //     printf("%c", d);
+    // }
+    // what0.c
+    // a fun függvényben az int *p csak egy másolat, a main függvényben lévő p
+    // nek ugyanaz marad az értéke
+
+    // what1.c
+    // *p++; p-t előbb elmozdítja aztán adja vissza az értéket
+    // *++p; előbb eltolom utána dereferálom
+    // --*p; előbb dereferálom utána csökkentem
+
+    // what2.c
+    // *&a  &*a , ugyanúgy a címét kapom meg
+
+    // what3.c
+    // csak sima int** pointer
+
+    // what4.c
+    // int a[][3] = {1,2,3,4,5,6};
+    // int (*ptr)[3] = a; // ha a-t dereferálnám ami az első 3 elemű tömb címét
+    // tárolja, akkor egy három elemű tömböt kapok, ezért ez a type, azaz "a"
+    // egy három elemű tömbre pointer, általánosan a tömb nevű változó az első
+    // elem címe (arra mutató pointer) 2 3 \\ 5 6
+
+    // what5.c
+    // gh\0, p+=4 => ez eltolja p-t ij-re, aztán [-1] vissza meg eggyel és
+    // dereferál
+
+    // ======== FILE ============
+    FILE *fp;
+
+    // módok
+    printf("A parancssori argumentumok száma: %d\n", argc);
+    for (int i = 0; i < argc; i++) {
+        printf("Az %d. argumentum: %s\n", i, argv[i]);
+    }
+
+    printf("\n\n2. feladat\n\n");
+    char BUF[255];
+    char BUF_2[255];
+
+    fgets(BUF, 255, stdin);
+    strcpy(BUF_2, BUF);
+    printf("A beolvasott szavak: %s", BUF);
+
+    char delim[] = " ";
+    char *token = strtok(BUF, delim);
+
+    // puts("Az 5-nél hosszabb szavak:");
+    while (token != NULL) {
+        char *current_word = token;
+
+        if (strlen(current_word) > 5) {
+            puts("5-nél hosszabb szó: ");
+            printf("%s\n", current_word);
+        }
+
+        if (strchr(current_word, 'x') != NULL) {
+            puts("x-et tartalmazó szó: ");
+            printf("%s\n", current_word);
+        }
+
+        if (strstr(current_word, "alma")) {
+            puts("Az alma szót tartalmazó szó: ");
+            printf("%s\n", current_word);
+        }
+
+        if (strcmp(current_word, "cica") == 0)
+            printf("Ez a szó a cica\n");
+        else
+            printf("Ez a szó nem a cica\n");
+
+        token = strtok(NULL, delim);
+    }
+
+    puts("Az eredeti szó:");
+    printf("%s\n", BUF_2);
+
+    printf("\n3. feladat\n");
+    if (argc == 3) {
+        printf("A szorzat: %d\n", atoi(argv[1]) * atoi(argv[2]));
+    }
+
+    printf("\n4. feladat\n");
+    printf("%lld\n", factorial(3));
+    printf("%llu\n", factorial((unsigned int)50));
+
+    printf("\n5. feladat\n");
+    fp = fopen("player.txt", "w");
+    fprintf(fp, "knjasd\n");
+
+    fp = fopen("even_numbers.txt", "a");
+
+    int ints[6] = {12, 34, 56, 77, 21, 876};
+    for (int i = 0; i < 6; i++) {
+        if (ints[i] % 2 == 0) {
+        }
+        // fprintf(fp, "%d, ",ints[i]);
+    }
+    // fprintf(fp, "\n");
+
+    printf("\n6. feladat\n");
+    logger(1, "user not logged in");
+
+    printf("\n7. feladat\n");
+    FILE *fp2 = fopen("tetszoleges.txt", "w");
+    if (fp2 == NULL)
+        exit(EXIT_FAILURE);
+    int ret = fputs("Random data\nnext", fp2);
+    if (ret == EOF) {
+        exit(EXIT_FAILURE);
+    }
+    char c;
+    // scanf("%c", &c); close előtt nincs kiírva az adat
+
+    printf("\n8. feladat\n");
+    char str[] = "asdDFFgggJkL";
+    toLowerCase(str);
+    puts(str);
+
+    printf("\n9. feladat\n");
+    char str2[] = "almaAoeskuU";
+    pushVowels(str2);
+    puts(str2);
+
+    printf("\n10. feladat\n");
+    FILE *fp3 = fopen(argv[1], "rb");
+    if (fp3 == NULL) {
+        exit(EXIT_FAILURE);
+    }
+    int lineNumber = atoi(argv[2]);
+    char BIGBUF[1024];
+    int i = 1;
+    while (i <= lineNumber && fgets(BIGBUF, 1024, fp3) != NULL) {
+        i++;
+    }
+    printf("The %d-th line is %s", lineNumber, BIGBUF);
+
+    printf("\n11. feladat\n");
+    rewind(fp3);
+    fseek(fp3, 0, SEEK_END);
+    long file_size = ftell(fp3);
+    fseek(fp3, 0, SEEK_SET);
+
+    printf("File size is: %ld\n", file_size);
+    char arr[file_size + 1];
+    char arr_re[file_size + 1];
+    fread(arr, 1, file_size, fp3);
+    arr[file_size] = '\0';
+    memcpy(arr_re, arr, file_size + 1);
+    printf("The content is: %s", arr);
+    printf("The content is: %s", arr_re);
+    int word_count = 0;
+    char delims[] = " \n,.\"'";
+
+    char *token2 = strtok(arr, delims);
+    while (token2 != NULL) {
+        word_count++;
+        token2 = strtok(NULL, delims);
+    }
+
+    char unique_words[word_count][512];
+    int unique_count = 0;
+    token2 = strtok(arr_re, delims);
+    while (token2 != NULL) {
+        if (!word_include(unique_words, word_count, token2)) {
+            strncpy(unique_words[unique_count], token2, 512);
+            unique_count++;
+        }
+        token2 = strtok(NULL, delims);
+    }
+
+    printf("The word count is: %d\n", word_count);
+    printf("The number of unique words is: %d\n", unique_count);
+
+    printf("\n12. feladat\n");
+    char src[] = "Convert me to morse code!";
+    char **dest = (char **)malloc(strlen(src) * sizeof(char *));
+    morse_converter(src, dest);
+
+    fp3 = fopen("morse.txt", "w");
+    for (int i = 0; i < strlen(src); i++) {
+        printf("%s\n", dest[i]);
+        fprintf(fp3, "%s\n", dest[i]);
+        free(dest[i]);
+    }
+    free(dest);
+    fclose(fp);
+    fclose(fp2);
+    fclose(fp3);
+    return 0;
+}
+static const char *alpha[] = {
+    ".-",   // A
+    "-...", // B
+    "-.-.", // C
+    "-..",  // D
+    ".",    // E
+    "..-.", // F
+    "--.",  // G
+    "....", // H
+    "..",   // I
+    ".---", // J
+    "-.-",  // K
+    ".-..", // L
+    "--",   // M
+    "-.",   // N
+    "---",  // O
+    ".--.", // P
+    "--.-", // Q
+    ".-.",  // R
+    "...",  // S
+    "-",    // T
+    "..-",  // U
+    "...-", // V
+    ".--",  // W
+    "-..-", // X
+    "-.--", // Y
+    "--..", // Z
+};
+static const char *whitesapce[] = {
+    " " // Space
+};
+void morse_converter(char *src, char *dest[]) {
+    for (size_t i = 0; i < strlen(src); i++) {
+        if (isalpha(src[i])) {
+            dest[i] = (char *)malloc(sizeof(alpha[toupper(src[i]) - 'A']));
+            strcpy(dest[i], alpha[toupper(src[i]) - 'A']);
+        } else {
+            dest[i] = (char *)malloc(sizeof(whitesapce[0]));
+            strcpy(dest[i], whitesapce[0]);
+        }
+    }
+}
+int word_include(char src[][512], int src_len, char *word) {
+    for (int i = 0; i < src_len; i++) {
+        if (strcmp(src[i], word) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+int includes(char *str, int length, char elem) {
+    for (int i = 0; i < length; i++) {
+        if (str[i] == elem)
+            return i;
+    }
+    return -1;
+}
+void change(char *a, int ind, char vowels[]) { *a = vowels[ind + 1]; }
+void pushVowels(char *str) {
+    static char vowels[12] = {'a', 'e', 'i', 'o', 'u', 'a',
+                              'A', 'E', 'I', 'O', 'U', 'A'};
+    for (int i = 0; i < strlen(str); i++) {
+        int ind = includes(vowels, 12, str[i]);
+        if (ind != -1) {
+            change(str + i, ind, vowels);
+        }
+    }
+}
+unsigned long long factorial(unsigned int x) {
+    if (x == 0) {
+        return 1;
+    }
+    return x * factorial(x - 1);
+}
+
+void logger(int id, char msg[]) {
+
+    char output[256];
+    switch (id) {
+    case 0:
+        strcpy(output, "INFO");
+        break;
+    case 1:
+        strcpy(output, "WARNING");
+        break;
+    case 2:
+        strcpy(output, "ERROR");
+        break;
+    default:
+        strcpy(output, "LOG");
+        break;
+    }
+    strcpy(output, " - ");
+    strncpy(output, msg, 245);
+
+    puts(output);
+    output[255] = '\0';
+}
+
+int keres(int arr[], int length, int elem) {
+    int idx = 0;
+    do {
+        if (arr[idx] == elem) {
+            break;
+        }
+        idx++;
+    } while (idx < length);
+    return idx;
+}
+
+void toLowerCase(char *str) {
+    for (int i = 0; i < strlen(str); i++) {
+        if ('A' <= str[i] && str[i] <= 'Z') {
+            str[i] = str[i] + 32;
+        }
+    }
+}
