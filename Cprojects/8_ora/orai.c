@@ -144,24 +144,21 @@ int main(int argc, char **argv) {
 
     // 9. feladat
     size_t length = 8;
-    FILE *fp = fopen("numbers.txt", "r");
+    FILE *fp = fopen("num.txt", "r");
     FILE *foutput = fopen("output.txt", "w");
 
     char *line = malloc(sizeof(char) * length);
     char *current_position = line;
+
     size_t full_line_length = 0;
-    while (!feof(fp)) {
-        // 0 1 2 3 4 5 6 (7) 8 9 10 11 12 13 14 (15) 16
-        if (current_position == line) {
-            fgets(current_position, length, fp);
-        } else {
-            fgets(current_position, length / 2, fp);
+    while (1) {
+        fgets(current_position, length - (current_position - line), fp);
+        if (feof(fp)) {
+            break;
         }
-        // full line read in
-        size_t current_line_length = strlen(current_position);
-        full_line_length += current_line_length + 1;
-        if (current_position[current_line_length - 1] == '\n' /*|| feof(fp)*/) {
-            // analyze
+        size_t current_part_length = strlen(current_position);
+        full_line_length += current_part_length + 1;
+        if (current_position[current_part_length - 1] == '\n') {
             for (size_t i = 0; i < full_line_length; i++) {
                 printf("%c", line[i]);
             }
