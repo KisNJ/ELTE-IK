@@ -164,7 +164,6 @@ int main(int argc, char **argv) {
 
     free(line);
     fclose(fp);
-    fclose(foutput);
     return 0;
 }
 
