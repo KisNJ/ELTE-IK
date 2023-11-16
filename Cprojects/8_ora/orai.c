@@ -1,3 +1,5 @@
+#include <errno.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,6 +8,8 @@
 void reverse(char *str);
 char *reverse_dynamic(char *str);
 int *parity_sort(int *arr, size_t length);
+void print_sort_nums_in(char *line);
+int sort_longs(const void *a, const void *b);
 
 int main(int argc, char **argv) {
     // 1. feladat
@@ -42,7 +46,6 @@ int main(int argc, char **argv) {
 
     // 4. feladat
     {
-#ifdef RUN_4
         char *words[5];
         for (int i = 0; i < 5; i++) {
             words[i] = malloc(64);
@@ -61,14 +64,10 @@ int main(int argc, char **argv) {
             printf("%s\n", words[i]);
             free(words[i]);
         }
-
-#endif /* ifdef RUN_4 */
     }
 
     // 5-6. feladat
     {
-#ifdef RUN_5_6
-
         if (argc == 2) {
             int number = atoi(argv[1]);
             size_t read_in = 0;
@@ -95,39 +94,38 @@ int main(int argc, char **argv) {
             }
             free(arr);
         }
-#endif /* ifdef RUN_5_6 */
     }
 
     // 7. feladat
     {
-        // size_t length = 4;
-        // char **arr = malloc(sizeof(char *) * length);
-        // for (size_t i = 0; i < length; i++) {
-        //     arr[i] = malloc(16);
-        // }
-        // size_t number_of_lines = 0;
-        // while (!feof(stdin)) {
-        //     fgets(arr[number_of_lines], 16, stdin);
-        //     arr[number_of_lines][strcspn(arr[number_of_lines], "\n")] = '\0';
-        //
-        //     number_of_lines++;
-        //     if (number_of_lines == length) {
-        //         length *= 2;
-        //         arr = realloc(arr, sizeof(char *) * length);
-        //         for (size_t i = number_of_lines; i < length; i++) {
-        //             arr[i] = malloc(16);
-        //         }
-        //     }
-        // }
-        //
-        // puts("");
-        // for (size_t i = 0; i < number_of_lines; i++) {
-        //     printf("%s\n", arr[i]);
-        // }
-        // for (size_t i = 0; i < length; i++) {
-        //     free(arr[i]);
-        // }
-        // free(arr);
+        size_t length = 4;
+        char **arr = malloc(sizeof(char *) * length);
+        for (size_t i = 0; i < length; i++) {
+            arr[i] = malloc(16);
+        }
+        size_t number_of_lines = 0;
+        while (!feof(stdin)) {
+            fgets(arr[number_of_lines], 16, stdin);
+            arr[number_of_lines][strcspn(arr[number_of_lines], "\n")] = '\0';
+
+            number_of_lines++;
+            if (number_of_lines == length) {
+                length *= 2;
+                arr = realloc(arr, sizeof(char *) * length);
+                for (size_t i = number_of_lines; i < length; i++) {
+                    arr[i] = malloc(16);
+                }
+            }
+        }
+
+        puts("");
+        for (size_t i = 0; i < number_of_lines; i++) {
+            printf("%s\n", arr[i]);
+        }
+        for (size_t i = 0; i < length; i++) {
+            free(arr[i]);
+        }
+        free(arr);
     }
 
     // 8. feladat
@@ -144,30 +142,23 @@ int main(int argc, char **argv) {
 
     // 9. feladat
     size_t length = 8;
-    FILE *fp = fopen("num.txt", "r");
-    FILE *foutput = fopen("output.txt", "w");
+    FILE *fp = fopen("numbers.txt", "r");
 
     char *line = malloc(sizeof(char) * length);
     char *current_position = line;
 
-    size_t full_line_length = 0;
     while (1) {
         fgets(current_position, length - (current_position - line), fp);
         if (feof(fp)) {
             break;
         }
-        size_t current_part_length = strlen(current_position);
-        full_line_length += current_part_length + 1;
-        if (current_position[current_part_length - 1] == '\n') {
-            for (size_t i = 0; i < full_line_length; i++) {
-                printf("%c", line[i]);
-            }
-            full_line_length = 0;
+        if (line[strlen(line) - 1] == '\n') {
+            print_sort_nums_in(line);
             current_position = line;
         } else {
             length *= 2;
             line = realloc(line, length);
-            current_position = line + length / 2;
+            current_position = line + length / 2 - 1;
         }
     }
 
@@ -177,6 +168,50 @@ int main(int argc, char **argv) {
     return 0;
 }
 
+void print_sort_nums_in(char *line) {
+    char *initial = line;
+    size_t length = 8;
+    size_t i = 0;
+    long *nums = malloc(sizeof(long) * length);
+    char *end;
+    for (;; i++) {
+        if (i == length) {
+            length *= 2;
+            nums = realloc(nums, sizeof(long) * length);
+        }
+        errno = 0;
+        const long num = strtol(line, &end, 10);
+
+        if (end == line) {
+            break;
+        }
+
+        const bool range_error = errno == ERANGE;
+        if (range_error)
+            printf("Number %.*s, to big %ld is stored\n", (int)(end - line),
+                   line, num);
+        nums[i] = num;
+        line = end;
+    }
+
+    line = initial;
+    qsort(nums, i, sizeof(long), sort_longs);
+    for (size_t j = 0; j < i; j++) {
+        printf("%ld ", nums[j]);
+    }
+    putchar('\n');
+    free(nums);
+}
+int sort_longs(const void *a, const void *b) {
+    long x = *(const long *)a;
+    long y = *(const long *)b;
+
+    if (x < y)
+        return -1;
+    if (x > y)
+        return 1;
+    return 0;
+}
 void reverse(char *str) {
     size_t length = strlen(str);
     for (size_t i = 0; i < length / 2; i++) {
